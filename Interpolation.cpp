@@ -5,7 +5,7 @@
 #include "Interpolation.h"
 
 
-void Interpolation::fill_arc(Matrix& matrixX, Matrix& matrixY, int i1, int i3, int j1, int j3, Point p1, Point p2, Point p3) {
+void Interpolation::fillArc(Matrix& matrixX, Matrix& matrixY, int i1, int i3, int j1, int j3, Point p1, Point p2, Point p3) {
     // По трём точкам, не лежащим на одной прямой, строится дуга A окружности omega,
     // проходящей через p1, p2, p3, причём дуга A соединяет точки p1 и p3.
     // Вектор X-координат дуги A заполняет матрицу matrixX X-координат
@@ -13,8 +13,6 @@ void Interpolation::fill_arc(Matrix& matrixX, Matrix& matrixY, int i1, int i3, i
     // Аналогично, вектор Y-координат дуги A заполняет матрицу matrixY Y-координат
     // с (i1, j1) координаты до (i3, j3) координаты.
     // Заметим, что согласно описанию либо i1 = i3, либо j1 = j3.
-
-    // А дуга проходит через точку p2?
 
     if (((i1 != i3) && (j1 != j3))
         || matrixX.getShape(0) != matrixY.getShape(0)
@@ -108,14 +106,14 @@ void Interpolation::contour(Matrix& matrixX, Matrix& matrixY) {
     auto b = 4.8;
     auto c = Point(0.03, 0.03);
 
-    fill_arc(matrixX, matrixY, 1, N1, N2, N2,
-             Point(-a + c.x, a + c.y), Point(0 + c.x, b + c.y), Point(a + c.x, a + c.y));
-    fill_arc(matrixX, matrixY, 1, N1, 1, 1,
-             Point(-a + c.x, -a + c.y), Point(0 + c.x, -b + c.y), Point(a + c.x, -a + c.y));
-    fill_arc(matrixX, matrixY, 1, 1, 1, N2,
-             Point(-a + c.x, -a + c.y), Point(-b + c.x, 0 + c.y), Point(-a + c.x, a + c.y));
-    fill_arc(matrixX, matrixY, N1, N1, 1, N2,
-             Point(a + c.x, -a + c.y), Point(b + c.x, 0 + c.y), Point(a + c.x, a + c.y));
+    fillArc(matrixX, matrixY, 1, N1, N2, N2,
+            Point(-a + c.x, a + c.y), Point(0 + c.x, b + c.y), Point(a + c.x, a + c.y));
+    fillArc(matrixX, matrixY, 1, N1, 1, 1,
+            Point(-a + c.x, -a + c.y), Point(0 + c.x, -b + c.y), Point(a + c.x, -a + c.y));
+    fillArc(matrixX, matrixY, 1, 1, 1, N2,
+            Point(-a + c.x, -a + c.y), Point(-b + c.x, 0 + c.y), Point(-a + c.x, a + c.y));
+    fillArc(matrixX, matrixY, N1, N1, 1, N2,
+            Point(a + c.x, -a + c.y), Point(b + c.x, 0 + c.y), Point(a + c.x, a + c.y));
 }
 
 void Interpolation::linearInterpolation(Matrix& matrixX, Matrix& matrixY) {
@@ -217,7 +215,6 @@ void Interpolation::Laplasiation(Matrix& matrixX, Matrix& matrixY, Matrix& ih, i
         sumError /= N1 * N2;
     }
 
-//    matrixX.print();
     double yacmin;
     double yacmax;
 
@@ -306,9 +303,6 @@ void Interpolation::buildGrid(Matrix& matrixX, Matrix& matrixY, Matrix& ih, int 
             ih(i, j) = 3;
         }
     }
-
-//    ih.print();
-//    matrixX.print();
 
     contour(matrixX, matrixY);
     linearInterpolation(matrixX, matrixY);
@@ -616,11 +610,11 @@ double Interpolation::interpolationElement(Point a, Point b, Point c, Point d,
                                            double fA, double fB, double fC, double fD) {
     auto Copt = -c.x*d.y/2.0+c.x*b.y/2.0+a.x*d.y/2.0-a.x*b.y/2.0
                 -d.x*a.y/2.0+d.x*c.y/2.0+b.x*a.y/2.0-b.x*c.y/2.0;
-    return Copt * f_interp(a, b, c, d, fA, fB, fC, fD);
+    return Copt * fInterp(a, b, c, d, fA, fB, fC, fD);
 }
 
-double Interpolation::f_interp(Point a, Point b, Point c, Point d,
-                               double fA, double fB, double fC, double fD) {
+double Interpolation::fInterp(Point a, Point b, Point c, Point d,
+                              double fA, double fB, double fC, double fD) {
     auto X1 = (a.x*a.x*b.y-a.x*a.x*d.y-a.x*a.y*b.x+a.x*a.y*d.x+a.x*b.x*b.y-a.x*d.x*d.y-a.y*b.x*b.x+a.y*d.x*
                d.x+b.x*b.x*c.y-b.x*b.y*c.x+b.x*c.x*c.y-b.y*c.x*c.x+c.x*c.x*d.y-c.x*c.y*d.x+c.x*d.x*d.y-c.y*d.x*d.x)
               /(a.x*b.y-a.x*d.y-a.y*b.x+a.y*d.x+b.x*c.y-b.y*c.x+c.x*d.y-c.y*d.x)/3.0;
